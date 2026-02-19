@@ -95,37 +95,18 @@ async function runPollingCycle() {
         console.log(`Found ${batch.length} new relevant articles. Analyzing with AI...${JSON.stringify(batch)}`);
 
         // 4. AI Analysis
-        // const results = await classifyArticles(batch);//to revert
-        const results = [];//to revert
+        const results = await classifyArticles(batch);
 
         // 5. Confirmed Threats
-        // const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);//to revert
-        const confirmed = batch;
+        const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);
+
         if (confirmed.length > 0) {
             console.log(`🚨 ALERT: Found ${confirmed.length} CONFIRMED threats!`);
 
             // Map back to article data for the notification
-            // const articlesToSend = confirmed.map(alert => {
-            //     return batch.find(b => b.id === alert.id);
-            // }).filter(Boolean);
-            const articlesToSend = [
-                {
-                    id: 123456789,
-                    publisher: 'Telegram: Middle_East_Spectator',
-                    title: 'TEST ALERT: This is a test notification',
-                    summary: 'This is a test summary from the test script to verify FCM integration.',
-                    link: 'https://t.me/Middle_East_Spectator/12345',
-                    publishedAt: new Date().toISOString()
-                },
-                {
-                    id: 987654321,
-                    publisher: 'Telegram: DefenderDome',
-                    title: 'TEST ALERT 2: Another source confirmation',
-                    summary: 'Second source confirming the test event.',
-                    link: 'https://t.me/DefenderDome/67890',
-                    publishedAt: new Date().toISOString()
-                }
-            ];
+            const articlesToSend = confirmed.map(alert => {
+                return batch.find(b => b.id === alert.id);
+            }).filter(Boolean);
 
             // 6. Send Notification
             await sendAlert(articlesToSend);
