@@ -1,0 +1,15 @@
+name: API Scheduler
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes
+  workflow_dispatch:          # allows manual run from GitHub UI
+
+jobs:
+  call-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call API
+        run: |
+          curl -X GET https://ai-news-alarm-system.onrender.com
