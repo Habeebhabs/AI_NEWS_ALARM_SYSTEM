@@ -92,7 +92,7 @@ async function runPollingCycle() {
             return;
         }
 
-        console.log(`Found ${batch.length} new relevant articles. Analyzing with AI...`);
+        console.log(`Found ${batch.length} new relevant articles. Analyzing with AI...${batch}`);
 
         // 4. AI Analysis
         const results = await classifyArticles(batch);
