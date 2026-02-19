@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Call API
         run: |
-          curl -X GET https://ai-news-alarm-system.onrender.com
+          curl -X GET https://ai-news-alarm-system.onrender.com?source=github
