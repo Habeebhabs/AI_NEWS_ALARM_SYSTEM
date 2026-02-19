@@ -23,7 +23,7 @@ const client = new TelegramClient(stringSession, apiId, apiHash, {
 });
 
 const CHANNEL_NAME = 'Middle_East_Spectator';
-const POLLING_INTERVAL = 60 * 1000; // 60 seconds
+// const POLLING_INTERVAL = 60 * 1000; // 60 seconds
 const seenHashes = new Set();
 
 async function startServer() {
@@ -38,7 +38,7 @@ async function startServer() {
     client.session.save(); // Save this string to avoid logging in again
 
     // Start Polling Loop
-    setInterval(runPollingCycle, POLLING_INTERVAL);
+    // setInterval(runPollingCycle, POLLING_INTERVAL);
     // Run immediately on start
     runPollingCycle();
 

@@ -21,9 +21,15 @@ try {
 }
 
 export async function sendAlert(articles) {
-    const topic = "news_alerts";
+    const topic = "news_alerts_v2";
 
     const message = {
+        android: {
+            notification: {
+                channelId: "news_alerts_v2",
+                sound: "alarm"
+            }
+        },
         notification: {
             title: "🚨 URGENT: Military Attack Confirmed",
             body: `${articles.length} sources confirmed a military event. Check App immediately.`
