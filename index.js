@@ -121,6 +121,11 @@ async function runPollingCycle() {
 
 // Simple health check endpoint for Render
 app.get('/', (req, res) => {
+    // Log source if present (e.g., 'client')
+    const source = req.query.source;
+    if (source) {
+        console.log(`source: ${source}`);
+    }
     res.send('AI News Alarm Server is Running (Polling Mode)');
 });
 
