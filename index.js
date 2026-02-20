@@ -89,7 +89,7 @@ async function runPollingCycle(channelId) {
         console.log(`Polling ${CHANNEL_NAME}`);
 
         const messages = await client.getMessages(CHANNEL_NAME, { limit: 20 });
-        let batch = [];// to revert
+        const batch = [];
 
         for (const msg of messages) {
             if (!msg.message) continue;
@@ -109,21 +109,21 @@ async function runPollingCycle(channelId) {
             };
 
             // 2. Dedup Check
-            // const idHash = hashArticle(article); // to revert
-            // if (seenHashes.has(idHash)) continue;// to revert
+            const idHash = hashArticle(article);
+            if (seenHashes.has(idHash)) continue;
 
             // 3. Relevance Check
-            // if (!isRelevant(article)) {// to revert
-            //     // Mark as seen so we don't re-check irrelevant ones
-            //     seenHashes.add(idHash);
-            //     continue;
-            // }
+            if (!isRelevant(article)) {
+                // Mark as seen so we don't re-check irrelevant ones
+                seenHashes.add(idHash);
+                continue;
+            }
 
             // It's relevant and new -> Add to batch
             batch.push(article);
-            // seenHashes.add(idHash);// to revert
+            seenHashes.add(idHash);
         }
-        batch = [batch[0]];// to revert
+
         if (batch.length === 0) {
             console.log("No new relevant messages.");
             return;
@@ -132,14 +132,11 @@ async function runPollingCycle(channelId) {
         console.log(`Found ${batch.length} new relevant articles. Analyzing with AI...${JSON.stringify(batch, null, 2)}`);
 
         // 4. AI Analysis
-        // const results = await classifyArticles(batch);// to revert
-        // console.log(`AI Analysis Results: ${JSON.stringify(results, null, 2)}`);// to revert
+        const results = await classifyArticles(batch);
+        console.log(`AI Analysis Results: ${JSON.stringify(results, null, 2)}`);
         // 5. Confirmed Threats
-        // const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);// to revert
-        console.log('batch', batch)
-        const confirmed = batch;// to revert
+        const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);
         if (confirmed.length > 0) {
-            console.log('confirmed', confirmed)
             console.log(`🚨 ALERT: Found ${confirmed.length} CONFIRMED threats!`);
 
             // Map back to article data for the notification
