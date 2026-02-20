@@ -30,6 +30,34 @@ let CHANNEL_NAME = '';
 
 // const POLLING_INTERVAL = 60 * 1000; // 60 seconds
 const seenHashes = new Set();
+const activeAlerts = new Map(); // id -> { articles, retryCount, timer }
+
+/**
+ * Retries sending an alert every 2 minutes for a max of 3 times
+ * unless acknowledged by the user.
+ */
+function scheduleRetry(alertId) {
+    const alertData = activeAlerts.get(alertId);
+    if (!alertData) return;
+
+    if (alertData.retryCount >= 3) {
+        console.log(`[Limit] Max retries reached for alert ${alertId}. Stopping.`);
+        activeAlerts.delete(alertId);
+        return;
+    }
+
+    alertData.timer = setTimeout(async () => {
+        // Double check if still active
+        const currentData = activeAlerts.get(alertId);
+        if (!currentData) return;
+
+        console.log(`[Retry ${currentData.retryCount + 1}/3] Resending alert ${alertId}...`);
+        await sendAlert(currentData.articles);
+
+        currentData.retryCount++;
+        scheduleRetry(alertId);
+    }, 2 * 60 * 1000); // 2 minute interval
+}
 
 async function startServer() {
     console.log("Loading interactive example...");
@@ -81,21 +109,21 @@ async function runPollingCycle(channelId) {
             };
 
             // 2. Dedup Check
-            const idHash = hashArticle(article);
-            if (seenHashes.has(idHash)) continue;
+            // const idHash = hashArticle(article); // to revert
+            // if (seenHashes.has(idHash)) continue;// to revert
 
             // 3. Relevance Check
-            if (!isRelevant(article)) {
-                // Mark as seen so we don't re-check irrelevant ones
-                seenHashes.add(idHash);
-                continue;
-            }
+            // if (!isRelevant(article)) {// to revert
+            //     // Mark as seen so we don't re-check irrelevant ones
+            //     seenHashes.add(idHash);
+            //     continue;
+            // }
 
             // It's relevant and new -> Add to batch
             batch.push(article);
-            seenHashes.add(idHash);
+            // seenHashes.add(idHash);// to revert
         }
-
+        batch = batch[0];// to revert
         if (batch.length === 0) {
             console.log("No new relevant messages.");
             return;
@@ -104,11 +132,11 @@ async function runPollingCycle(channelId) {
         console.log(`Found ${batch.length} new relevant articles. Analyzing with AI...${JSON.stringify(batch, null, 2)}`);
 
         // 4. AI Analysis
-        const results = await classifyArticles(batch);
+        // const results = await classifyArticles(batch);// to revert
         console.log(`AI Analysis Results: ${JSON.stringify(results, null, 2)}`);
         // 5. Confirmed Threats
-        const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);
-
+        // const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);// to revert
+        const confirmed = batch;// to revert
         if (confirmed.length > 0) {
             console.log(`🚨 ALERT: Found ${confirmed.length} CONFIRMED threats!`);
 
@@ -119,6 +147,18 @@ async function runPollingCycle(channelId) {
 
             // 6. Send Notification
             await sendAlert(articlesToSend);
+
+            // 7. Initialize Retry Logic
+            const alertId = articlesToSend[0].id.toString();
+            if (!activeAlerts.has(alertId)) {
+                activeAlerts.set(alertId, {
+                    articles: articlesToSend,
+                    retryCount: 0,
+                    timer: null
+                });
+                console.log(`[Orchestration] Started retry cycle for alert ${alertId}`);
+                scheduleRetry(alertId);
+            }
         } else {
             console.log("Analysis complete. No confirmed threats.");
         }
@@ -141,6 +181,37 @@ app.get('/', async (req, res) => {
     runPollingCycle(channelId);
 
     res.send('AI News Alarm Server Triggered');
+});
+
+// Acknowledge endpoint to stop retries
+app.post('/acknowledge', (req, res) => {
+    const { id } = req.body;
+    console.log(`[Ack] Received acknowledgment request for ID: ${id}`);
+
+    if (!id) {
+        return res.status(400).json({ error: "Missing alert ID" });
+    }
+
+    const alertId = id.toString();
+    if (activeAlerts.has(alertId)) {
+        const data = activeAlerts.get(alertId);
+        if (data.timer) clearTimeout(data.timer);
+        activeAlerts.delete(alertId);
+        console.log(`✅ [Ack] Alert ${alertId} acknowledged. All retries stopped.`);
+        res.json({ success: true, message: `Alert ${alertId} acknowledged. Retries stopped.` });
+    } else {
+        console.log(`⚠️ [Ack] Alert ${alertId} not found in active list (likely already acknowledged or expired).`);
+        res.json({ success: false, message: "Alert not found or already acknowledged." });
+    }
+});
+
+// Debug endpoint to see active retries
+app.get('/pending', (req, res) => {
+    const pending = Array.from(activeAlerts.keys()).map(id => ({
+        id: id,
+        retriesDone: activeAlerts.get(id).retryCount
+    }));
+    res.json({ count: pending.length, pending });
 });
 
 startServer();
