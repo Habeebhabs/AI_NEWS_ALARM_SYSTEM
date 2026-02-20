@@ -94,10 +94,10 @@ async function runPollingCycle(channelId) {
         for (const msg of messages) {
             if (!msg.message) continue;
 
-            // 1. Time Check (12 hours)
+            // 1. Time Check (2 hours)
             const publishedAt = new Date(msg.date * 1000);
             const timeDiff = Date.now() - publishedAt.getTime();
-            if (timeDiff > 12 * 60 * 60 * 1000) continue;
+            if (timeDiff > 2 * 60 * 60 * 1000) continue;
 
             const article = {
                 id: msg.id,
