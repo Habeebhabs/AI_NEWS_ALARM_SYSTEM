@@ -22,7 +22,12 @@ const client = new TelegramClient(stringSession, apiId, apiHash, {
     connectionRetries: 5,
 });
 
-const CHANNEL_NAME = 'Middle_East_Spectator';
+const channelMap = {
+    1: 'Middle_East_Spectator',
+    2: 'DefenderDome'
+}
+let CHANNEL_NAME = '';
+
 // const POLLING_INTERVAL = 60 * 1000; // 60 seconds
 const seenHashes = new Set();
 
@@ -40,7 +45,7 @@ async function startServer() {
     // Start Polling Loop
     // setInterval(runPollingCycle, POLLING_INTERVAL);
     // Run immediately on start
-    runPollingCycle();
+    runPollingCycle(1);
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
@@ -48,9 +53,13 @@ async function startServer() {
     });
 }
 
-async function runPollingCycle() {
+async function runPollingCycle(channelId) {
     console.log(`[${new Date().toLocaleTimeString()}] Polling Telegram...`);
     try {
+        CHANNEL_NAME = channelMap[channelId || 1];
+
+        console.log(`Polling ${CHANNEL_NAME}`);
+
         const messages = await client.getMessages(CHANNEL_NAME, { limit: 20 });
         const batch = [];
 
@@ -123,12 +132,13 @@ async function runPollingCycle() {
 app.get('/', async (req, res) => {
     // Log source if present (e.g., 'client')
     const source = req.query.source;
+    const channelId = req.query.channelId;
     if (source) {
-        console.log(`Triggered by source: ${source}`);
+        console.log(`Triggered by source: ${source}  - channelId: ${channelId}`);
     }
 
     // Trigger the logic manually (Async, don't wait for it to finish)
-    runPollingCycle();
+    runPollingCycle(channelId);
 
     res.send('AI News Alarm Server Triggered');
 });
