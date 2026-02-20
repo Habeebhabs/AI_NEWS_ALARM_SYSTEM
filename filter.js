@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const KEYWORDS = ["attack", "strike", "missile", "airstrike", "bombardment", "launched", "military operation", "drone attack", "rocket attack"];
+const KEYWORDS = ["attack", "strike", "missile", "airstrike", "bombardment", "launched", "military operation", "drone attack", "rocket attack", "evacuated", "preparation", "deployment", "troop"];
 const IRAN_KEYWORDS = ["iran", "islamic republic", "tehran", "irgc", "khamenei", "supreme leader", "pezeshkian"];
 const USA_KEYWORDS = ["usa", "us", "u.s.", "united states", "america", "washington", "pentagon", "white house", "president", "trump", "pete hegseth", "israel"];
 
