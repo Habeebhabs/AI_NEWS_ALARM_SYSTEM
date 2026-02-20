@@ -105,7 +105,7 @@ async function runPollingCycle(channelId) {
 
         // 4. AI Analysis
         const results = await classifyArticles(batch);
-
+        console.log(`AI Analysis Results: ${JSON.stringify(results)}`);
         // 5. Confirmed Threats
         const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);
 
