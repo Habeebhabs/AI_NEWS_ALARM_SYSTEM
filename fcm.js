@@ -25,6 +25,7 @@ export async function sendAlert(articles) {
 
     const message = {
         android: {
+            priority: "high",
             notification: {
                 channelId: "news_alerts_v2",
                 sound: "alarm"
