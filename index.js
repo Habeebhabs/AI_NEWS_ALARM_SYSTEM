@@ -123,7 +123,7 @@ async function runPollingCycle(channelId) {
             batch.push(article);
             // seenHashes.add(idHash);// to revert
         }
-        batch = batch[0];// to revert
+        batch = [batch[0]];// to revert
         if (batch.length === 0) {
             console.log("No new relevant messages.");
             return;
@@ -133,11 +133,13 @@ async function runPollingCycle(channelId) {
 
         // 4. AI Analysis
         // const results = await classifyArticles(batch);// to revert
-        console.log(`AI Analysis Results: ${JSON.stringify(results, null, 2)}`);
+        // console.log(`AI Analysis Results: ${JSON.stringify(results, null, 2)}`);// to revert
         // 5. Confirmed Threats
         // const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);// to revert
+        console.log('batch', batch)
         const confirmed = batch;// to revert
         if (confirmed.length > 0) {
+            console.log('confirmed', confirmed)
             console.log(`🚨 ALERT: Found ${confirmed.length} CONFIRMED threats!`);
 
             // Map back to article data for the notification
