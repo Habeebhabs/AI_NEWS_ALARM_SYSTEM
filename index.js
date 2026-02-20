@@ -89,7 +89,7 @@ async function runPollingCycle(channelId) {
         console.log(`Polling ${CHANNEL_NAME}`);
 
         const messages = await client.getMessages(CHANNEL_NAME, { limit: 20 });
-        const batch = [];
+        let batch = [];// to revert
 
         for (const msg of messages) {
             if (!msg.message) continue;
