@@ -101,11 +101,11 @@ async function runPollingCycle(channelId) {
             return;
         }
 
-        console.log(`Found ${batch.length} new relevant articles. Analyzing with AI...${JSON.stringify(batch)}`);
+        console.log(`Found ${batch.length} new relevant articles. Analyzing with AI...${JSON.stringify(batch, null, 2)}`);
 
         // 4. AI Analysis
         const results = await classifyArticles(batch);
-        console.log(`AI Analysis Results: ${JSON.stringify(results)}`);
+        console.log(`AI Analysis Results: ${JSON.stringify(results, null, 2)}`);
         // 5. Confirmed Threats
         const confirmed = results.filter(res => res.confirmed && res.confidence >= 80);
 
